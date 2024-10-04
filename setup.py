@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='saksinijava-dataexploration',  # Replace with your package name
     version='0.1',
-    author='Your Name',  # Replace with your name
+    author='saki ni java',  # Replace with your name
     author_email='your_email@example.com',  # Replace with your email
     description='A brief description of your package',
     long_description=open('README.md').read(),  # If you have a README file

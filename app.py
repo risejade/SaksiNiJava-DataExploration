@@ -3,15 +3,19 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
+import gdown
 
-# Define the relative file path to your dataset
-file_path = os.path.join('dataset', 'studentsperformance.csv')
+# Define the Google Drive file ID and the output file name
+file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
+output_file = 'studentsperformance.csv'
+
+# Download the dataset from Google Drive
+gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
 
 # Load the dataset
 @st.cache  # Cache the data loading for performance
 def load_data():
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(output_file)
 
     # Drop the 'StudentID' column if it exists
     if 'StudentID' in df.columns:

@@ -4,9 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import gdown
+import plotly.express as px
 import altair as alt
 
-st.title("Student Performance Dataset: An Exploration of Key Factors")
+st.title("Student Performance Dataset: An Exploration of Key Factors 📈🎓")
+
+st.markdown("---")
+
 st.image("dataset-cover.jpg", use_column_width=True)
 
 st.subheader("Introduction")
@@ -16,7 +20,7 @@ The data spans across multiple demographic and behavioral aspects such as **age*
 all of which are analyzed in relation to **students' Grade Point Average (GPA)** and **overall performance**.
 """)
 
-with st.expander("Overview"):
+with st.expander("📜 Overview"):
     st.markdown("""
     The dataset originally contained **15 fields**, but we dropped the **StudentID** field as it serves as a unique identifier for students but doesn't contribute to the analysis of their academic performance.
 
@@ -30,7 +34,7 @@ with st.expander("Overview"):
     Our goal is to analyze how these features influence student performance and determine what factors correlate with better or worse academic outcomes.
     """)
 
-with st.expander("Dataset Source"):
+with st.expander("🌐 Dataset Source"):
     st.markdown("""
     This dataset is sourced from Kaggle and created by Rabie ElKharoua. It aims to explore the impact of various factors—such as demographics, study habits, and 
     parental involvement—on student academic performance. The dataset is valuable for educational research and predictive modeling, offering insights that can 
@@ -39,7 +43,7 @@ with st.expander("Dataset Source"):
     **Dataset Link**: [Student Performance Dataset](https://www.kaggle.com/datasets/rabieelkharoua/students-performance-dataset )
     """)
 
-with st.expander("Purpose of Exploration"):
+with st.expander("🖋️ Purpose of Exploration"):
     st.markdown("""
     The primary aim of this exploration is to analyze the factors influencing student academic performance based on the dataset. Specifically, we seek to answer the following questions:
 
@@ -56,7 +60,7 @@ with st.expander("Purpose of Exploration"):
     By addressing these questions, we aim to uncover actionable insights into the determinants of academic performance, guiding strategies for improvement in educational settings.
     """)
 
-with st.expander("Data Fields Overview"):
+with st.expander("👁️ Data Fields Overview"):
     st.markdown("""
     This dataset now consists of **14 key fields**, grouped into five main categories, which are described below.
 
@@ -100,14 +104,13 @@ with st.expander("Data Fields Overview"):
 
 st.markdown("---")
 
-st.subheader("Exploratory Data Analysis (EDA)")
 
-# Countplot of each categorical variable
 
 file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
 output_file = 'studentsperformance.csv'
 
-gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
+with st.spinner('Loading data...'):
+    gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
 
 @st.cache_data  
 def load_data():
@@ -117,8 +120,70 @@ def load_data():
         df = df.drop(columns=['StudentID'])
     return df
 
-df = load_data()
+with st.spinner('Loading data into the application...'):
+    df = load_data()
+    
+st.subheader("Descriptive Statistics")
 
+st.markdown("""
+        The age statistics of the students in the dataset reveal that the average age is approximately 16.47 years, 
+        indicating that most students are around this age. The median age stands at 16.00 years, 
+        suggesting that half of the students are younger than 16 and half are older, reinforcing the centrality of age within this dataset. 
+        Additionally, the mode age is 15 years, highlighting that this age group is particularly common among the students. 
+        The standard deviation of 1.12 years indicates a relatively small spread in ages, with most students falling within one to two years of the average age. 
+        These statistics provide valuable insights into the age distribution of the student population, which can be essential for further analysis of academic 
+        performance and related factors.
+        """)
+
+
+mean_age = df['Age'].mean()
+median_age = df['Age'].median()
+mode_age = df['Age'].mode()[0] 
+std_dev_age = df['Age'].std()
+
+
+stats_data = {
+    "Statistic": ["Mean", "Median", "Mode", "Standard Deviation"],
+    "Age": [mean_age, median_age, mode_age, std_dev_age]
+}
+
+stats_df = pd.DataFrame(stats_data)
+
+
+st.table(stats_df)
+
+st.markdown("---")
+
+st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
+
+chart_type = st.selectbox('Select a chart to display:', ['Age', 'Gender'])
+
+if chart_type == 'Age':
+    if not df['Age'].isnull().any():
+        age_counts = df['Age'].value_counts().reset_index()
+        age_counts.columns = ['Age', 'Count']
+        
+        fig_age = px.pie(age_counts, names='Age', values='Count', title='Age Distribution', 
+                         color_discrete_sequence=px.colors.qualitative.Set2)
+        st.plotly_chart(fig_age)
+    else:
+        st.write("No valid age data available.")
+
+elif chart_type == 'Gender':
+    df['Gender'] = df['Gender'].replace({0: 'Male', 1: 'Female'})
+    if not df['Gender'].isnull().any():
+        gender_counts = df['Gender'].value_counts().reset_index()
+        gender_counts.columns = ['Gender', 'Count']
+        
+        fig_gender = px.pie(gender_counts, names='Gender', values='Count', title='Gender Distribution', 
+                            color_discrete_sequence=px.colors.qualitative.Set2)
+        st.plotly_chart(fig_gender)
+    else:
+        st.write("No valid gender data available.")
+
+st.markdown("---")
+
+st.subheader("Exploratory Data Analysis (EDA)")
 
 df.drop(['GPA'], axis=1, inplace=True)
 
@@ -156,7 +221,6 @@ st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container
 
 
 
-# How does the impact of absences on GPA vary by age?
 
 file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
 output_file = 'studentsperformance.csv'
@@ -213,4 +277,62 @@ else:
 
     st.altair_chart(gpa_chart, use_container_width=True)
 
+    st.markdown("---")
     
+    st.subheader("🔑 Key Statistics")
+    
+    st.markdown("""
+        The dataset contains 2,392 records and 15 fields; it includes meter- and time-related measurements
+            and categorical data. The age of the students is between the ages of fifteen and eighteen years with a mean
+            age of about sixteen years. 47. Regarding the gender of the students, 51% of the learners are males which
+            have been coded as 0 while 49 % are females which have been coded as 1. There are four ethnic
+            classifications, most of them being whites. Parental education levels are also shown to be distinct where
+            most learners are from homes with parents who have completed high school. Weekly study time means an
+            average of 9 hours. 77 hours (about 6 days), from close to 0 h to 20 h, with students in this case having an
+            average of about 14 h. 54 absences and the maximum number of 29. Some 30 per cent of students get on
+            with tutors, and parents’ involvement varies from none to expressed extremely high and has an average mark.
+            Extra curriculum activity rates are roughly at 38% while average G.P.A is roughly 2. 98, the values of which
+            range from 0. 11 to 4. 00. The target variable is Grade Class, which has some distribution of grades, and
+            most of the students are in ‘C’ and ‘B’ grades. These few important statistics help the user understand and
+            analyze the student performance as well as the several aspects that may be affecting it.
+        """)
+    
+    data_stats = {
+    "Metric": [
+        "Total Records", 
+        "Mean Age", 
+        "Gender (Male)", 
+        "Gender (Female)", 
+        "Most Common Ethnicity", 
+        "Parental Education Level", 
+        "Average Study Hours", 
+        "Average Absences", 
+        "Students with Tutors", 
+        "Average GPA", 
+        "Grade Class Distribution"
+    ],
+    "Value": [
+        2392, 
+        16.47, 
+        "51%", 
+        "49%", 
+        "Whites", 
+        "High School", 
+        "9.77", 
+        "14.54", 
+        "30%", 
+        "2.98", 
+        "Mostly C and B grades"
+    ]
+}
+
+# Create a DataFrame
+df_stats = pd.DataFrame(data_stats)
+
+# Display statistics table
+st.subheader("Descriptive Statistics")
+st.table(df_stats)
+
+# Optional: Visualize key statistics
+st.subheader("Key Statistics Visualization")
+st.bar_chart(df_stats.set_index('Metric')['Value'].apply(pd.to_numeric, errors='coerce').dropna())

@@ -162,19 +162,25 @@ with st.expander("🔑 Key Statistics"):
 
 st.markdown("---")
 
-file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
-output_file = 'studentsperformance.csv'
+st.subheader("Exploratory Data Analysis (EDA)")
+
+# Countplot of each categorical variable
+
+with st.expander("Countplot - categorical variable"):
+    # Countplot of each categorical variable
+    file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
+    output_file = 'studentsperformance.csv'
 
 with st.spinner('Loading data...'):
     gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
 
-@st.cache_data  
-def load_data():
-    df = pd.read_csv(output_file)
+    @st.cache_data  
+    def load_data():
+        df = pd.read_csv(output_file)
 
-    if 'StudentID' in df.columns:
-        df = df.drop(columns=['StudentID'])
-    return df
+        if 'StudentID' in df.columns:
+            df = df.drop(columns=['StudentID'])
+        return df
 
 with st.spinner('Loading data into the application...'):
     df = load_data()
@@ -210,128 +216,160 @@ st.table(stats_df)
 
 st.markdown("---")
 
+with st.expander("Pie Chart - Age and Gender"):
+    st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
 
-st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
+    chart_type = st.selectbox('Select a chart to display:', ['Age', 'Gender'])
 
-chart_type = st.selectbox('Select a chart to display:', ['Age', 'Gender'])
-
-if chart_type == 'Age':
-    if not df['Age'].isnull().any():
-        age_counts = df['Age'].value_counts().reset_index()
-        age_counts.columns = ['Age', 'Count']
+    if chart_type == 'Age':
+        if not df['Age'].isnull().any():
+            age_counts = df['Age'].value_counts().reset_index()
+            age_counts.columns = ['Age', 'Count']
         
-        fig_age = px.pie(age_counts, names='Age', values='Count', title='Age Distribution', 
-                         color_discrete_sequence=px.colors.qualitative.Set2)
-        st.plotly_chart(fig_age)
-    else:
-        st.write("No valid age data available.")
-
-elif chart_type == 'Gender':
-    df['Gender'] = df['Gender'].replace({0: 'Male', 1: 'Female'})
-    if not df['Gender'].isnull().any():
-        gender_counts = df['Gender'].value_counts().reset_index()
-        gender_counts.columns = ['Gender', 'Count']
-        
-        fig_gender = px.pie(gender_counts, names='Gender', values='Count', title='Gender Distribution', 
+            fig_age = px.pie(age_counts, names='Age', values='Count', title='Age Distribution', 
                             color_discrete_sequence=px.colors.qualitative.Set2)
-        st.plotly_chart(fig_gender)
-    else:
-        st.write("No valid gender data available.")
+            st.plotly_chart(fig_age)
+        else:
+            st.write("No valid age data available.")
 
-st.markdown("---")
-
-st.subheader("Exploratory Data Analysis (EDA)")
-
-df.drop(['GPA'], axis=1, inplace=True)
-
-numerical_columns = [col for col in df.columns if df[col].nunique() > 5]
-
-categorical_columns = df.columns.difference(numerical_columns).difference(['GradeClass']).to_list()
-
-custom_labels = {
-    'Ethnicity': ['Caucasian', 'African American', 'Asian', 'Other'],
-    'Age': [15, 16, 17, 18],
-    'ParentalEducation': ['None', 'High School', 'Some College', 'Bachelor\'s', 'Higher'],
-    'Tutoring': ['No', 'Yes'],
-    'ParentalSupport': ['No', 'Low', 'Moderate', 'High', 'Very High'],
-    'Extracurricular': ['No', 'Yes'],
-    'Sports': ['No', 'Yes'],
-    'Music': ['No', 'Yes'],
-    'Volunteering': ['No', 'Yes'],
-    'Gender': ['Male', 'Female']
-}
-
-selected_variable = st.selectbox('Select a categorical variable to display a countplot', categorical_columns)
-
-st.subheader(f'Countplot of {selected_variable}')
-
-counts = df[selected_variable].value_counts().sort_index()
-
-counts_df = pd.DataFrame(counts).reset_index()
-counts_df.columns = [selected_variable, 'Count']
-
-counts_df[selected_variable] = counts_df[selected_variable].replace(dict(enumerate(custom_labels[selected_variable])))
-
-colors = sns.color_palette("Set2", n_colors=len(counts_df))
-
-st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
-
-
-
-
-file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
-output_file = 'studentsperformance.csv'
-
-gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
-
-@st.cache_data  
-def load_data():
-    df = pd.read_csv(output_file)
-
-    if 'StudentID' in df.columns:
-        df = df.drop(columns=['StudentID'])
-    return df
-
-df = load_data()
-
-
-df.Age = df.Age.astype('int64')
-df['Absences'] = pd.to_numeric(df['Absences'], errors='coerce')
-
-age_list = df.Age.unique()
-age_selection = st.multiselect('Select Age(s) for analysis', age_list, [15, 16])
-
-df_selection = df[df['Age'].isin(age_selection)]
-
-absences_selection = st.slider('Select number of absences', 0.0, 30.0, (0.0, 30.0), step=0.1)
-df_selection = df_selection[df_selection['Absences'].between(absences_selection[0], absences_selection[1])]
-
-if df_selection.empty:
-    st.write("No data available for the selected criteria.")
-else:
-    reshaped_df = df_selection.pivot_table(index='Absences', columns='Age', values='GPA', aggfunc='mean', fill_value=0)
-    reshaped_df = reshaped_df.sort_index(ascending=True)
-
-    df_editor = st.data_editor(
-        reshaped_df, 
-        height=212, 
-        use_container_width=True,
-        column_config={col: st.column_config.NumberColumn(col) for col in reshaped_df.columns},
-        num_rows="dynamic"
-    )
-
-    df_chart = df_editor.reset_index().melt(id_vars='Absences', var_name='Age', value_name='GPA')
-
-    gpa_chart = alt.Chart(df_chart).mark_line().encode(
-        x=alt.X('Absences:Q', title='Number of Absences'),
-        y=alt.Y('GPA:Q', title='Average GPA'),
-        color='Age:N',
-        tooltip=['Age', 'Absences', 'GPA']
-    ).properties(
-        title='Average GPA by Absences and Age',
-        height=300
-    )
-
-    st.altair_chart(gpa_chart, use_container_width=True)
+    elif chart_type == 'Gender':
+        df['Gender'] = df['Gender'].replace({0: 'Male', 1: 'Female'})
+        if not df['Gender'].isnull().any():
+            gender_counts = df['Gender'].value_counts().reset_index()
+            gender_counts.columns = ['Gender', 'Count']
+        
+            fig_gender = px.pie(gender_counts, names='Gender', values='Count', title='Gender Distribution', 
+                                color_discrete_sequence=px.colors.qualitative.Set2)
+            st.plotly_chart(fig_gender)
+        else:
+            st.write("No valid gender data available.")
 
     st.markdown("---")
+
+with st.expander("Count Plot - Categorical Variable"):
+    df.drop(['GPA'], axis=1, inplace=True)
+
+    numerical_columns = [col for col in df.columns if df[col].nunique() > 5]
+
+    categorical_columns = df.columns.difference(numerical_columns).difference(['GradeClass']).to_list()
+
+    custom_labels = {
+        'Ethnicity': ['Caucasian', 'African American', 'Asian', 'Other'],
+        'Age': [15, 16, 17, 18],
+        'ParentalEducation': ['None', 'High School', 'Some College', 'Bachelor\'s', 'Higher'],
+        'Tutoring': ['No', 'Yes'],
+        'ParentalSupport': ['No', 'Low', 'Moderate', 'High', 'Very High'],
+        'Extracurricular': ['No', 'Yes'],
+        'Sports': ['No', 'Yes'],
+        'Music': ['No', 'Yes'],
+        'Volunteering': ['No', 'Yes'],
+        'Gender': ['Male', 'Female']
+    }
+
+    selected_variable = st.selectbox('Select a categorical variable to display a countplot', categorical_columns)
+
+    st.subheader(f'Countplot of {selected_variable}')
+
+    counts = df[selected_variable].value_counts().sort_index()
+
+    counts_df = pd.DataFrame(counts).reset_index()
+    counts_df.columns = [selected_variable, 'Count']
+
+    counts_df[selected_variable] = counts_df[selected_variable].replace(dict(enumerate(custom_labels[selected_variable])))
+
+    colors = sns.color_palette("Set2", n_colors=len(counts_df))
+
+    st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
+
+
+with st.expander("Line Chart - Average GPA by Absences and Age"):
+    file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
+    output_file = 'studentsperformance.csv'
+
+    gdown.download(f'https://drive.google.com/uc?id={file_id}', output_file, quiet=False)
+
+    @st.cache_data  
+    def load_data():
+        df = pd.read_csv(output_file)
+
+        if 'StudentID' in df.columns:
+            df = df.drop(columns=['StudentID'])
+        return df
+
+    df = load_data()
+
+
+    df.Age = df.Age.astype('int64')
+    df['Absences'] = pd.to_numeric(df['Absences'], errors='coerce')
+
+    age_list = df.Age.unique()
+    age_selection = st.multiselect('Select Age(s) for analysis', age_list, [15, 16])
+
+    df_selection = df[df['Age'].isin(age_selection)]
+
+    absences_selection = st.slider('Select number of absences', 0.0, 30.0, (0.0, 30.0), step=0.1)
+    df_selection = df_selection[df_selection['Absences'].between(absences_selection[0], absences_selection[1])]
+
+    if df_selection.empty:
+        st.write("No data available for the selected criteria.")
+    else:
+        reshaped_df = df_selection.pivot_table(index='Absences', columns='Age', values='GPA', aggfunc='mean', fill_value=0)
+        reshaped_df = reshaped_df.sort_index(ascending=True)
+
+        df_editor = st.data_editor(
+            reshaped_df, 
+            height=212, 
+            use_container_width=True,
+            column_config={col: st.column_config.NumberColumn(col) for col in reshaped_df.columns},
+            num_rows="dynamic"
+        )
+
+        df_chart = df_editor.reset_index().melt(id_vars='Absences', var_name='Age', value_name='GPA')
+
+        gpa_chart = alt.Chart(df_chart).mark_line().encode(
+            x=alt.X('Absences:Q', title='Number of Absences'),
+            y=alt.Y('GPA:Q', title='Average GPA'),
+            color='Age:N',
+            tooltip=['Age', 'Absences', 'GPA']
+        ).properties(
+            title='Average GPA by Absences and Age',
+            height=300
+        )
+
+        st.altair_chart(gpa_chart, use_container_width=True)
+
+# GPA Distribution by Demographic Features Section (box plot)
+with st.expander("Box plot - GPA Distribution by Demographics"):
+    st.subheader("GPA Distribution by Demographics")
+    selected_feature = st.selectbox("Select a demographic feature to analyze GPA distribution", ['Age', 'Gender', 'Ethnicity'])
+    plt.figure(figsize=(8, 4))
+    sns.boxplot(x=selected_feature, y='GPA', data=df)
+    st.pyplot(plt.gcf())
+    st.markdown(f"The boxplot shows how GPA varies based on **{selected_feature}**. This helps to see the distribution of GPA among different groups.")
+
+# Study Time vs GPA Scatter Plot Section
+with st.expander("Scatter plot - Study time vs GPA"):
+    st.subheader("Study Time vs GPA")
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(x='StudyTimeWeekly', y='GPA', hue='GradeClass', data=df, palette='tab10')
+    plt.title("Study Time vs. GPA")
+    st.pyplot(plt.gcf())
+    st.markdown("This scatter plot shows the relationship between weekly study time and GPA. Points are colored based on students' grade classifications.")
+
+# Bar Chart of Grade Class Distribution Section
+with st.expander("Bar Graph - Grade Class Distribution"):
+    st.subheader("Grade Class Distribution")
+    grade_class_group = df.groupby('GradeClass').size().reset_index(name='Counts')
+    grade_class_group['GradeClass'] = grade_class_group['GradeClass'].replace({
+        0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'F'
+    })
+    st.bar_chart(data=grade_class_group.set_index('GradeClass')['Counts'])
+    st.markdown("The bar chart above shows the distribution of students across different grade classes.")
+
+# GPA by Parental Support Section
+with st.expander("Box Plot - GPA by Parental Support"):
+    st.subheader("GPA by Parental Support")
+    plt.figure(figsize=(8, 4))
+    sns.boxplot(x='ParentalSupport', y='GPA', data=df, palette='muted')
+    st.pyplot(plt.gcf())
+    st.markdown("This boxplot illustrates how **parental support** levels correlate with GPA.")

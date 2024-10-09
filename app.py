@@ -102,9 +102,65 @@ with st.expander("👁️ Data Fields Overview"):
         - 4: 'F' (GPA < 2.0)
     """)
 
+with st.expander("🔑 Key Statistics"):
+    
+    # Add the descriptive statistics text
+    st.markdown("""
+        The dataset contains 2,392 records and 15 fields; it includes meter- and time-related measurements
+        and categorical data. The age of the students is between the ages of fifteen and eighteen years, with a mean
+        age of about sixteen years. Regarding the gender of the students, 51% are males (coded as 0) and 49% are females (coded as 1).
+        There are four ethnic classifications, most of them being whites. Parental education levels are also shown to be distinct, 
+        where most learners are from homes with parents who have completed high school. Weekly study time averages around 9.77 hours, 
+        with students studying between 0 to 20 hours, having an average of about 14.54 hours. 
+        The average number of absences is 54, with a maximum of 29. About 30% of students have tutors, and parental involvement varies 
+        from none to extremely high, with an average mark. Extracurricular activity rates are roughly at 38%, while the average GPA 
+        is approximately 2.98, ranging from 0.11 to 4.00. The target variable is Grade Class, which has a distribution of grades, 
+        with most students receiving ‘C’ and ‘B’ grades. These important statistics help the user understand and analyze student performance, 
+        as well as various aspects that may be affecting it.
+    """)
+
+    # Define the data for statistics
+    data_stats = {
+        "Metric": [
+            "Total Records", 
+            "Mean Age", 
+            "Gender (Male)", 
+            "Gender (Female)", 
+            "Most Common Ethnicity", 
+            "Parental Education Level", 
+            "Average Study Hours", 
+            "Average Absences", 
+            "Students with Tutors", 
+            "Average GPA", 
+            "Grade Class Distribution"
+        ],
+        "Value": [
+            2392, 
+            16.47, 
+            "51%", 
+            "49%", 
+            "Whites", 
+            "High School", 
+            "9.77", 
+            "14.54", 
+            "30%", 
+            "2.98", 
+            "Mostly C and B grades"
+        ]
+    }
+
+    # Create a DataFrame
+    df_stats = pd.DataFrame(data_stats)
+
+    # Display statistics table
+    st.subheader("Key Descriptive Statistics")
+    st.table(df_stats)
+
+    # Optional: Visualize key statistics
+    st.subheader("Key Statistics Visualization")
+    st.bar_chart(df_stats.set_index('Metric')['Value'].apply(pd.to_numeric, errors='coerce').dropna())
+
 st.markdown("---")
-
-
 
 file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
 output_file = 'studentsperformance.csv'
@@ -153,6 +209,7 @@ stats_df = pd.DataFrame(stats_data)
 st.table(stats_df)
 
 st.markdown("---")
+
 
 st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
 

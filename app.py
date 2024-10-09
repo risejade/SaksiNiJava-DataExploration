@@ -187,7 +187,7 @@ with st.spinner('Loading data...'):
 with st.spinner('Loading data into the application...'):
     df = load_data()
     
-st.subheader("Descriptive Statistics")
+st.subheader("📋 Descriptive Statistics")
 
 st.markdown("""
         The age statistics of the students in the dataset reveal that the average age is approximately 16.47 years, 
@@ -340,27 +340,96 @@ with st.expander("Line Chart - Average GPA by Absences and Age"):
 
         st.altair_chart(gpa_chart, use_container_width=True)
 
-        # GPA Distribution by Demographic Features Section (box plot)
+# Box plot - GPA Distribution by Demographics
 with st.expander("Box plot - GPA Distribution by Demographics"):
-    st.subheader("GPA Distribution by Demographics")
+    st.subheader("📈 GPA Distribution by Demographics")
     selected_feature = st.selectbox("Select a demographic feature to analyze GPA distribution", ['Age', 'Gender', 'Ethnicity'])
-    plt.figure(figsize=(8, 4))
-    sns.boxplot(x=selected_feature, y='GPA', data=df)
-    st.pyplot(plt.gcf())
-    st.markdown(f"The boxplot shows how GPA varies based on **{selected_feature}**. This helps to see the distribution of GPA among different groups.")
+    
+    # Create a Plotly box plot without points
+    fig = px.box(df, x=selected_feature, y='GPA', 
+                 labels={'GPA': 'Grade Point Average'},
+                 title=f"GPA Distribution by {selected_feature}")
+    
+    # Update layout for better aesthetics
+    fig.update_traces(marker=dict(color='lightblue'))  # Set the box color (optional)
+    
+    # Center the title
+    fig.update_layout(
+        xaxis_title=selected_feature,
+        yaxis_title="GPA",
+        title=dict(
+            text=f"GPA Distribution by {selected_feature}",
+            x=0.5,          # Center the title
+            xanchor='center',  # Anchor the title at the center
+            font=dict(size=20)  # Optional: Set font size for better visibility
+        )
+    )
+    
+    # Display the Plotly chart
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Conditional markdown based on the selected demographic feature
+    if selected_feature == 'Gender':
+        st.markdown("""The boxplot illustrates the distribution of GPA (Grade Point Average) based on gender, with gender categories represented as 0 and 1. 
+                    The x-axis denotes these gender categories, while the y-axis shows GPA values ranging from 0.0 to 4.0. Each box represents the interquartile 
+                    range (IQR) of GPA for each gender, with the line inside the box indicating the median GPA. The whiskers extend to show variability beyond the 
+                    upper and lower quartiles, capturing the range of GPA values. This boxplot enables a direct comparison of GPA distributions between the two gender groups, 
+                    highlighting any differences in academic performance, which can inform strategies to address educational disparities.""")
+
+    elif selected_feature == 'Age':
+        st.markdown("""The boxplot displays the GPA distribution across different age groups. Each box represents the GPA interquartile range (IQR) for the corresponding age group, 
+                    with the line inside indicating the median GPA. The whiskers extend to show variability beyond the upper and lower quartiles, illustrating how GPA may differ 
+                    among various age demographics. This visualization can help identify trends or disparities in academic performance by age.""")
+
+    elif selected_feature == 'Ethnicity':
+        st.markdown("""The boxplot illustrates the distribution of GPA across different ethnic groups. Each box represents the interquartile range (IQR) of GPA for each ethnic category, 
+                    with the line inside the box indicating the median GPA. The whiskers show variability beyond the upper and lower quartiles, providing insight into how GPA varies among 
+                    different ethnic backgrounds. This analysis can aid in understanding educational outcomes and addressing potential disparities among ethnic groups.""")
+
+
 
 # Study Time vs GPA Scatter Plot Section
 with st.expander("Scatter plot - Study time vs GPA"):
-    st.subheader("Study Time vs GPA")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(x='StudyTimeWeekly', y='GPA', hue='GradeClass', data=df, palette='tab10')
-    plt.title("Study Time vs. GPA")
-    st.pyplot(plt.gcf())
-    st.markdown("This scatter plot shows the relationship between weekly study time and GPA. Points are colored based on students' grade classifications.")
+    st.subheader("⏳ Study Time vs GPA")
+    
+    # Create a Plotly scatter plot
+    fig = px.scatter(df, x='StudyTimeWeekly', y='GPA', color='GradeClass', 
+                     color_continuous_scale=px.colors.sequential.Viridis,
+                     labels={'StudyTimeWeekly': 'Weekly Study Time', 'GPA': 'GPA'},
+                     title="Study Time vs. GPA")
+
+    # Update layout for better aesthetics
+    fig.update_layout(
+        xaxis_title="Weekly Study Time",
+        yaxis_title="GPA",
+        legend_title="Grade Class",
+        title_x=0.5
+    )
+    
+    # Center the title
+    fig.update_layout(
+        title=dict(
+            text=f"Study Time vs. GPA",
+            x=0.5,          # Center the title
+            xanchor='center',  # Anchor the title at the center
+            font=dict(size=20)  # Optional: Set font size for better visibility
+        )
+    )
+
+    # Display the Plotly chart
+    st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("""The scatterplot titled "Study Time vs. GPA" illustrates the relationship between the amount of time students spend studying weekly (on the x-axis) 
+                and their corresponding GPA (on the y-axis). Each point on the scatterplot represents an individual student's GPA based on their weekly study time. 
+                The colors of the points correspond to different grade classes, as indicated in the legend: purple (0.0), red (1.0), orange (2.0), green (3.0), and blue (4.0).
+                The scatterplot reveals a general trend where higher study time appears to correlate with higher GPA. 
+                While there is considerable variability in GPA at all levels of study time, the clustering of colors suggests that students who dedicate more time to studying tend to 
+                achieve better grades, particularly those in higher grade classes. This visualization helps in understanding the potential impact of study habits on academic performance, 
+                indicating that increased study time may be beneficial for improving GPA.""")
 
 # Bar Chart of Grade Class Distribution Section
 with st.expander("Bar Graph - Grade Class Distribution"):
-    st.subheader("Grade Class Distribution")
+    st.subheader("🥇 Grade Class Distribution")
     grade_class_group = df.groupby('GradeClass').size().reset_index(name='Counts')
     grade_class_group['GradeClass'] = grade_class_group['GradeClass'].replace({
         0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'F'
@@ -370,34 +439,65 @@ with st.expander("Bar Graph - Grade Class Distribution"):
 
 # GPA by Parental Support Section
 with st.expander("Box Plot - GPA by Parental Support"):
-    st.subheader("GPA by Parental Support")
-    plt.figure(figsize=(8, 4))
-    sns.boxplot(x='ParentalSupport', y='GPA', data=df, palette='muted')
-    st.pyplot(plt.gcf())
+    st.subheader("🙌 GPA by Parental Support")
+    
+    # Create a Plotly box plot
+    fig = px.box(df, x='ParentalSupport', y='GPA', 
+                 labels={'GPA': 'Grade Point Average'},
+                 title="GPA Distribution by Parental Support")
+
+    # Define a list of unique colors (one for each category)
+    unique_colors = ['lightblue', 'lightgreen', 'salmon', 'gold', 'violet']  # Ensure you have enough colors
+
+    # Assign a unique color to each box
+    for i, box in enumerate(fig.data):
+        box.marker.color = unique_colors[i % len(unique_colors)]  # Cycle through colors
+    
+    # Center the title
+    fig.update_layout(
+        xaxis_title="Parental Support",
+        yaxis_title="GPA",
+        title=dict(
+            text="GPA Distribution by Parental Support",
+            x=0.5,           # Center the title
+            xanchor='center',  # Anchor the title at the center
+            font=dict(size=20)  # Optional: Set font size for better visibility
+        )
+    )
+    
+    # Display the Plotly chart
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Markdown explanation
     st.markdown("This boxplot illustrates how **parental support** levels correlate with GPA.")
 
 # Correlation Heatmap Section
 with st.expander("Correlation Matrix Heatmap"):
-    corr = df.corr()
-    plt.figure(figsize=(10, 6))
     
-    # Create the heatmap with formatted annotations
-    sns.heatmap(
-        corr, 
-        annot=True, 
-        cmap='coolwarm', 
-        vmin=-1, 
-        vmax=1, 
-        center=0,
-        fmt=".2f",  # Format the numbers to two decimal places
-        annot_kws={"size": 10},  # Adjust the font size of the annotations
-        linewidths=0.5,  # Add lines between cells for better separation
-        linecolor='gray'  # Color of the lines
+    st.subheader("Correlation Matrix Heatmap")
+   
+    corr = df.corr()
+
+    # Create a Plotly heatmap with a valid colorscale
+    fig = px.imshow(
+        corr,
+        text_auto=".2f",  # Format numbers to 2 decimal places
+        color_continuous_scale='Viridis',  # You can change this to other valid colorscales
+        aspect="auto",
+        labels=dict(x="Variables", y="Variables", color="Correlation Coefficient"),
+    )
+
+    # Update layout for better aesthetics
+    fig.update_layout(
+        xaxis_title="Variables",
+        yaxis_title="Variables",
     )
     
-    plt.title("Correlation Matrix Heatmap", fontsize=14)  # Title for the heatmap
-    st.pyplot(plt.gcf())
-    st.markdown("The heatmap above shows correlations between numeric variables such as study time, absences, parental support, and GPA.")
+    # Display the Plotly chart
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Markdown explanation
+    st.markdown("The heatmap above shows correlations between numeric variables in the dataset.")
 
 variable_options = [
     "Age",

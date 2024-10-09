@@ -373,3 +373,34 @@ with st.expander("Box Plot - GPA by Parental Support"):
     sns.boxplot(x='ParentalSupport', y='GPA', data=df, palette='muted')
     st.pyplot(plt.gcf())
     st.markdown("This boxplot illustrates how **parental support** levels correlate with GPA.")
+
+st.subheader("Conclusion")
+st.image("conclu.jpg", use_column_width=True)
+
+
+conclusion_text = """
+    This report highlights factors that influence student academic performance. Most students are 16 
+    years old and are evenly split between genders with diverse ethnicities. Parental education levels vary but 
+    fewer have higher degrees. It also shows that students tend to study around 5 to 15 hours per week, but 
+    most did not have tutoring. Absenteeism is also very common with an average of 15 days (about 2 weeks) 
+    absent. In terms of extracurricular activities, there aren’t a lot of students involved. Based on the GPAs, 
+    students perform moderately, but the majority are in advanced classes suggesting that many are in advanced 
+    classes despite their average grades. 
+
+    The data shows strong correlations between certain factors and academic performance. There’s a 
+    negative correlation of absences and GPA suggesting that students tend to perform poorly when there are 
+    more absences. On the other hand, positive correlation exists between GPA and study, and between GPA 
+    and parental support, which suggests that students who study longer and receive support from their parents 
+    will tend to perform well academically. However, demographics and being in an extracurricular activity shows 
+    little to no correlation with GPA. 
+
+    In conclusion, attendance, study habits, and family background are the most influential factors in 
+    determining academic performance. The students who regularly attended school, spent more hours on 
+    studying, and came from supportive parents were likely to have better grades. Meanwhile, extracurricular 
+    activities, gender, and race did not seem to have influence over GPA. To enhance academic outcomes, 
+    students could focus on attending classes more and making schools a better place by encouraging better 
+    study habits and more involvement of parents.
+    """
+
+
+st.markdown(conclusion_text)

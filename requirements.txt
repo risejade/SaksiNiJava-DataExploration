@@ -5,3 +5,4 @@ matplotlib
 seaborn
 gdown
 plotly
+streamlit-option-menu

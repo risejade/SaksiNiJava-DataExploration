@@ -7,7 +7,15 @@ import gdown
 import plotly.express as px
 import altair as alt
 
-st.set_page_config(layout="centered")
+
+
+st.set_page_config(
+    page_title="Student Performance Dataset : Data Exploration", 
+    page_icon="🎓", 
+    layout="centered" 
+)
+
+
 
 st.title("Student Performance Dataset: An Exploration of Key Factors 📈🎓")
 
@@ -218,7 +226,7 @@ st.table(stats_df)
 
 st.markdown("---")
 
-with st.expander("Pie Chart - Age and Gender"):
+with st.expander("Pie Chart - Age and Gender", expanded=True):
     st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
 
     chart_type = st.selectbox('Select a chart to display:', ['Age', 'Gender'])
@@ -248,7 +256,7 @@ with st.expander("Pie Chart - Age and Gender"):
 
     st.markdown("---")
 
-with st.expander("Count Plot - Categorical Variable"):
+with st.expander("Count Plot - Categorical Variable", expanded=True):
     df.drop(['GPA'], axis=1, inplace=True)
 
     numerical_columns = [col for col in df.columns if df[col].nunique() > 5]
@@ -284,7 +292,7 @@ with st.expander("Count Plot - Categorical Variable"):
     st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
 
 
-with st.expander("Line Chart - Average GPA by Absences and Age"):
+with st.expander("Line Chart - Average GPA by Absences and Age", expanded=True):
     file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
     output_file = 'studentsperformance.csv'
 
@@ -341,7 +349,7 @@ with st.expander("Line Chart - Average GPA by Absences and Age"):
         st.altair_chart(gpa_chart, use_container_width=True)
 
 # Box plot - GPA Distribution by Demographics
-with st.expander("Box plot - GPA Distribution by Demographics"):
+with st.expander("Box plot - GPA Distribution by Demographics", expanded=True):
     st.subheader("📈 GPA Distribution by Demographics")
     selected_feature = st.selectbox("Select a demographic feature to analyze GPA distribution", ['Age', 'Gender', 'Ethnicity'])
     
@@ -389,7 +397,7 @@ with st.expander("Box plot - GPA Distribution by Demographics"):
 
 
 # Study Time vs GPA Scatter Plot Section
-with st.expander("Scatter plot - Study time vs GPA"):
+with st.expander("Scatter plot - Study time vs GPA", expanded=True):
     st.subheader("⏳ Study Time vs GPA")
     
     # Create a Plotly scatter plot
@@ -428,7 +436,7 @@ with st.expander("Scatter plot - Study time vs GPA"):
                 indicating that increased study time may be beneficial for improving GPA.""")
 
 # Bar Chart of Grade Class Distribution Section
-with st.expander("Bar Graph - Grade Class Distribution"):
+with st.expander("Bar Graph - Grade Class Distribution", expanded=True):
     st.subheader("🥇 Grade Class Distribution")
     grade_class_group = df.groupby('GradeClass').size().reset_index(name='Counts')
     grade_class_group['GradeClass'] = grade_class_group['GradeClass'].replace({
@@ -438,7 +446,7 @@ with st.expander("Bar Graph - Grade Class Distribution"):
     st.markdown("The bar chart above shows the distribution of students across different grade classes.")
 
 # GPA by Parental Support Section
-with st.expander("Box Plot - GPA by Parental Support"):
+with st.expander("Box Plot - GPA by Parental Support", expanded=True):
     st.subheader("🙌 GPA by Parental Support")
     
     # Create a Plotly box plot
@@ -472,7 +480,7 @@ with st.expander("Box Plot - GPA by Parental Support"):
     st.markdown("This boxplot illustrates how **parental support** levels correlate with GPA.")
 
 # Correlation Heatmap Section
-with st.expander("Correlation Matrix Heatmap"):
+with st.expander("Correlation Matrix Heatmap", expanded=True):
     
     st.subheader("Correlation Matrix Heatmap")
    
@@ -497,7 +505,20 @@ with st.expander("Correlation Matrix Heatmap"):
     st.plotly_chart(fig, use_container_width=True)
     
     # Markdown explanation
-    st.markdown("The heatmap above shows correlations between numeric variables in the dataset.")
+    st.markdown("""The matrix heatmap provided represents the correlation coefficients between various variables related to student performance and behavior. 
+                The color gradient from dark purple (negative correlations) to bright yellow (positive correlations) indicates the strength and direction of the relationships 
+                between the variables. Diagonal values are all 1.00 because they represent each variable's perfect correlation with itself.""")
+
+    # Adding a bullet list of key findings
+    st.write("Key Findings from the Correlation Matrix:")
+    findings = [
+        "📌 There is a strong negative correlation (-0.92) between Absences and GPA, indicating that more absences are associated with a lower GPA.",
+        "📌 Absences are positively correlated with GradeClass (0.73), suggesting that students in higher grades tend to have more absences.",
+        "📌 There is a negative correlation (-0.78) between GradeClass and GPA, indicating that students in higher grades generally have lower GPA scores.",
+        "📌 Most other variables, such as Parental Education, Sports, and Extracurricular activities, show weaker or negligible correlations with GPA or other variables."
+    ]
+    st.write("- " + "\n- ".join(findings))
+
 
 variable_options = [
     "Age",
@@ -516,62 +537,25 @@ variable_options = [
     "GradeClass"
 ]
 
-with st.expander("Histogram"):
+# Assuming df and variable_options are already defined
+with st.expander("Histogram", expanded=True):
     selected_variable = st.selectbox("Select variable to display histogram:", variable_options)
 
     # Define a function to plot the histogram based on the selected variable
-    def plot_histogram(variable):
-        plt.figure(figsize=(10, 6))
-    
-        if variable == "Age":
-            sns.histplot(df['Age'], bins=10, kde=True)
-            plt.title("Age Distribution of Students")
-        elif variable == "Gender":
-            sns.histplot(df['Gender'], bins=2, kde=False)
-            plt.title("Gender Distribution of Students")
-        elif variable == "Ethnicity":
-            sns.histplot(df['Ethnicity'], bins=4, kde=False)
-            plt.title("Ethnicity Distribution of Students")
-        elif variable == "Parental Education":
-            sns.histplot(df['ParentalSupport'], bins=5, kde=False)
-            plt.title("Parental Education Distribution")
-        elif variable == "StudyTimeWeekly":
-            sns.histplot(df['StudyTimeWeekly'], bins=10, kde=True)
-            plt.title("Weekly Study Time Distribution")
-        elif variable == "Absences":
-            sns.histplot(df['Absences'], bins=10, kde=True)
-            plt.title("Absences Distribution")
-        elif variable == "Tutoring":
-            sns.histplot(df['Tutoring'], bins=2, kde=False)
-            plt.title("Tutoring Distribution")
-        elif variable == "Parental Support":
-            sns.histplot(df['ParentalSupport'], bins=5, kde=False)
-            plt.title("Parental Support Distribution")
-        elif variable == "Extracurricular":
-            sns.histplot(df['Extracurricular'], bins=2, kde=False)
-            plt.title("Extracurricular Activity Distribution")
-        elif variable == "Sports":
-            sns.histplot(df['Sports'], bins=2, kde=False)
-            plt.title("Sports Participation Distribution")
-        elif variable == "Music":
-            sns.histplot(df['Music'], bins=2, kde=False)
-            plt.title("Music Participation Distribution")
-        elif variable == "Volunteering":
-            sns.histplot(df['Volunteering'], bins=2, kde=False)
-            plt.title("Volunteering Participation Distribution")
-        elif variable == "GPA":
-            sns.histplot(df['GPA'], bins=10, kde=True)
-            plt.title("GPA Distribution")
-        elif variable == "GradeClass":
-            sns.histplot(df['GradeClass'], bins=5, kde=False)
-            plt.title("Grade Class Distribution")
-
-        plt.xlabel(variable)
-        plt.ylabel("Frequency")
-        st.pyplot(plt)
+    def display_histogram(variable):
+        if variable in ["Age", "StudyTimeWeekly", "Absences", "GPA"]:
+            # For continuous variables
+            fig = px.histogram(df, x=variable, nbins=10, title=f"{variable} Distribution")
+            st.plotly_chart(fig)
+        elif variable in ["Gender", "Ethnicity", "Parental Education", "Tutoring", 
+                          "Parental Support", "Extracurricular", "Sports", 
+                          "Music", "Volunteering", "GradeClass"]:
+            # For categorical variables
+            fig = px.histogram(df, x=variable, title=f"{variable} Distribution", histnorm='percent')
+            st.plotly_chart(fig)
 
     # Call the function to plot the histogram for the selected variable
-    plot_histogram(selected_variable)
+    display_histogram(selected_variable)
 
     st.markdown("---")
 
@@ -594,7 +578,7 @@ def create_boxplots(data):
         'GradeClass'
     ]
     
-with st.expander("Box Plot"):
+with st.expander("Box Plot", expanded=True):
     # Add a selectbox for choosing the variable to visualize
     st.subheader("Boxplots of Student Variables")
     selected_variable = st.selectbox("Choose a variable to display its boxplot:", 

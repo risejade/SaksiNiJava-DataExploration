@@ -605,19 +605,29 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
     st.plotly_chart(fig, use_container_width=True)
 
     # Markdown explanation
-    st.markdown("""The matrix heatmap provided represents the correlation coefficients between various variables related to student performance and behavior. 
-                The color gradient from dark purple (negative correlations) to bright yellow (positive correlations) indicates the strength and direction of the relationships 
-                between the variables. Diagonal values are all 1.00 because they represent each variable's perfect correlation with itself.""")
+    st.markdown("""The heatmap you provided is a correlation matrix, 
+                which visually represents the relationships between 
+                different variables in a dataset related to predicting 
+                student grades (GPA). Each cell in the matrix contains 
+                a correlation coefficient, ranging from -1 to 1, which 
+                indicates the strength and direction of the relationship 
+                between two variables. A correlation of 1 (shown in yellow) 
+                indicates a perfect positive relationship, meaning as one 
+                variable increases, the other also increases. A correlation 
+                of -1 (shown in dark purple) signifies a perfect negative 
+                relationship, meaning that as one variable increases, the 
+                other decreases. A correlation near 0 (greenish-blue) 
+                implies no significant relationship between the two variables.""")
     
-    # Adding a bullet list of key findings
-    st.write("Key Findings from the Correlation Matrix:")
-    findings = [
-        "📌 There is a strong negative correlation (-0.92) between Absences and GPA, indicating that more absences are associated with a lower GPA.",
-        "📌 Absences are positively correlated with GradeClass (0.73), suggesting that students in higher grades tend to have more absences.",
-        "📌 There is a negative correlation (-0.78) between GradeClass and GPA, indicating that students in higher grades generally have lower GPA scores.",
-        "📌 Most other variables, such as Parental Education, Sports, and Extracurricular activities, show weaker or negligible correlations with GPA or other variables."
-    ]
-    st.write("- " + "\n- ".join(findings))
+# Adding a bullet list of key findings
+st.write("Key Findings from the Correlation Matrix:")
+findings = [
+    "📌 There is a strong negative correlation (-0.92) between Absences and GPA, indicating that more absences are associated with a significantly lower GPA.",
+    "📌 There is a positive but weak correlation (0.18) between StudyTimeWeekly and GPA, suggesting that more study time is somewhat linked to a higher GPA.",
+    "📌 A small positive correlation (0.09) exists between Sports and Extracurricular activities, indicating that students involved in sports are slightly more likely to participate in other extracurriculars.",
+    "📌 Several variables, including Age, Parental Education, Music, and Volunteering, show near-zero correlations with GPA, suggesting minimal impact on academic performance."
+]
+st.write("- " + "\n- ".join(findings))
     
 variable_options = [
     "Age",

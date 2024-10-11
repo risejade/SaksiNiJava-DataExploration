@@ -8,7 +8,6 @@ import plotly.express as px
 import altair as alt
 
 
-
 st.set_page_config(
     page_title="Student Performance Dataset : Data Exploration", 
     page_icon="🎓", 

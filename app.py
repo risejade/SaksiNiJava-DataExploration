@@ -224,7 +224,7 @@ st.table(stats_df)
 st.markdown("---")
 
 with st.expander("Pie Chart - Age and Gender", expanded=True):
-    st.subheader("Student Performance Dataset: Age and Gender Pie Charts")
+    st.subheader("Age and Gender Pie Charts")
 
     chart_type = st.selectbox('Select a chart to display:', ['Age', 'Gender'])
 
@@ -252,6 +252,43 @@ with st.expander("Pie Chart - Age and Gender", expanded=True):
             st.write("No valid gender data available.")
 
     st.markdown("---")
+
+
+variable_options = [
+    "Ethnicity",
+    "Parental Education",
+    "StudyTimeWeekly",
+    "Absences",
+    "Tutoring",
+    "Parental Support",
+    "Extracurricular",
+    "Sports",
+    "Music",
+    "Volunteering",
+    "GPA",
+    "GradeClass"
+]
+
+
+# Assuming df and variable_options are already defined
+with st.expander("Histogram", expanded=True):
+    selected_variable = st.selectbox("Select variable to display histogram:", variable_options)
+
+    # Define a function to plot the histogram based on the selected variable
+    def display_histogram(variable):
+        if variable in ["Age", "StudyTimeWeekly", "Absences", "GPA"]:
+            # For continuous variables
+            fig = px.histogram(df, x=variable, nbins=10, title=f"{variable} Distribution")
+            st.plotly_chart(fig)
+        elif variable in ["Gender", "Ethnicity", "Parental Education", "Tutoring", 
+                          "Parental Support", "Extracurricular", "Sports", 
+                          "Music", "Volunteering", "GradeClass"]:
+            # For categorical variables
+            fig = px.histogram(df, x=variable, title=f"{variable} Distribution", histnorm='percent')
+            st.plotly_chart(fig)
+
+    # Call the function to plot the histogram for the selected variable
+    display_histogram(selected_variable)
 
 # with st.expander("Count Plot - Categorical Variable", expanded=True):
 #     df.drop(['GPA'], axis=1, inplace=True)
@@ -630,42 +667,6 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
     st.write("- " + "\n- ".join(findings))
 
 # Other code continues here...
-
-variable_options = [
-    "Ethnicity",
-    "Parental Education",
-    "StudyTimeWeekly",
-    "Absences",
-    "Tutoring",
-    "Parental Support",
-    "Extracurricular",
-    "Sports",
-    "Music",
-    "Volunteering",
-    "GPA",
-    "GradeClass"
-]
-
-
-# Assuming df and variable_options are already defined
-with st.expander("Histogram", expanded=True):
-    selected_variable = st.selectbox("Select variable to display histogram:", variable_options)
-
-    # Define a function to plot the histogram based on the selected variable
-    def display_histogram(variable):
-        if variable in ["Age", "StudyTimeWeekly", "Absences", "GPA"]:
-            # For continuous variables
-            fig = px.histogram(df, x=variable, nbins=10, title=f"{variable} Distribution")
-            st.plotly_chart(fig)
-        elif variable in ["Gender", "Ethnicity", "Parental Education", "Tutoring", 
-                          "Parental Support", "Extracurricular", "Sports", 
-                          "Music", "Volunteering", "GradeClass"]:
-            # For categorical variables
-            fig = px.histogram(df, x=variable, title=f"{variable} Distribution", histnorm='percent')
-            st.plotly_chart(fig)
-
-    # Call the function to plot the histogram for the selected variable
-    display_histogram(selected_variable)
 
 st.subheader("Conclusion")
 st.image("conclu.jpg", use_column_width=True)

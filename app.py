@@ -618,17 +618,19 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
                 relationship, meaning that as one variable increases, the 
                 other decreases. A correlation near 0 (greenish-blue) 
                 implies no significant relationship between the two variables.""")
-    
-# Adding a bullet list of key findings
-st.write("Key Findings from the Correlation Matrix:")
-findings = [
-    "📌 There is a strong negative correlation (-0.92) between Absences and GPA, indicating that more absences are associated with a significantly lower GPA.",
-    "📌 There is a positive but weak correlation (0.18) between StudyTimeWeekly and GPA, suggesting that more study time is somewhat linked to a higher GPA.",
-    "📌 A small positive correlation (0.09) exists between Sports and Extracurricular activities, indicating that students involved in sports are slightly more likely to participate in other extracurriculars.",
-    "📌 Several variables, including Age, Parental Education, Music, and Volunteering, show near-zero correlations with GPA, suggesting minimal impact on academic performance."
-]
-st.write("- " + "\n- ".join(findings))
-    
+
+    # Adding a bullet list of key findings
+    st.write("Key Findings from the Correlation Matrix:")
+    findings = [
+        "📌 There is a strong negative correlation (-0.92) between Absences and GPA, indicating that more absences are associated with a significantly lower GPA.",
+        "📌 There is a positive but weak correlation (0.18) between StudyTimeWeekly and GPA, suggesting that more study time is somewhat linked to a higher GPA.",
+        "📌 A small positive correlation (0.09) exists between Sports and Extracurricular activities, indicating that students involved in sports are slightly more likely to participate in other extracurriculars.",
+        "📌 Several variables, including Age, Parental Education, Music, and Volunteering, show near-zero correlations with GPA, suggesting minimal impact on academic performance."
+    ]
+    st.write("- " + "\n- ".join(findings))
+
+# Other code continues here...
+
 variable_options = [
     "Age",
     "Gender",
@@ -645,6 +647,7 @@ variable_options = [
     "GPA",
     "GradeClass"
 ]
+
 
 # Assuming df and variable_options are already defined
 with st.expander("Histogram", expanded=True):

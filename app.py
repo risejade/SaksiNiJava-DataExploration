@@ -254,38 +254,72 @@ with st.expander("Pie Chart - Age and Gender", expanded=True):
     st.markdown("---")
 
 
-variable_options = [
-    "Ethnicity",
-    "Parental Education",
-    "StudyTimeWeekly",
-    "Absences",
-    "Tutoring",
-    "Parental Support",
-    "Extracurricular",
-    "Sports",
-    "Music",
-    "Volunteering",
-    "GPA",
-    "GradeClass"
-]
+variable_mapping = {
+    "Ethnicity": "Ethnicity",
+    "Parental Education": "ParentalEducation",  # Fixed column name
+    "StudyTimeWeekly": "StudyTimeWeekly",
+    "Absences": "Absences",
+    "Tutoring": "Tutoring",
+    "Parental Support": "ParentalSupport",
+    "Extracurricular": "Extracurricular",
+    "Sports": "Sports",
+    "Music": "Music",
+    "Volunteering": "Volunteering",
+    "GPA": "GPA",
+    "GradeClass": "GradeClass"
+}
 
+# List of readable options to display in the selectbox
+variable_options = list(variable_mapping.keys())
 
 # Assuming df and variable_options are already defined
 with st.expander("Histogram", expanded=True):
-    selected_variable = st.selectbox("Select variable to display histogram:", variable_options)
+    selected_variable_display = st.selectbox("Select variable to display histogram:", variable_options)
+    
+    # Get the actual column name from the mapping
+    selected_variable = variable_mapping[selected_variable_display]
+
+    # Define a function to check correlation with GPA
+    def check_correlation(variable):
+        if df[variable].dtype in ['float64', 'int64']:  # Check if continuous variable
+            correlation = df[variable].corr(df['GPA'])
+            if correlation > 0:
+                st.write(f"🔍 **{variable}** shows a positive correlation with GPA (Correlation: {correlation:.2f}). This suggests that higher values of {variable} tend to be associated with higher GPA.")
+            elif correlation < 0:
+                st.write(f"🔍 **{variable}** shows a negative correlation with GPA (Correlation: {correlation:.2f}). This suggests that higher values of {variable} tend to be associated with lower GPA.")
+            else:
+                st.write(f"🔍 **{variable}** has no significant correlation with GPA (Correlation: {correlation:.2f}).")
+        else:
+            # For categorical variables, we can display a grouped bar plot with GPA
+            avg_gpa_per_category = df.groupby(variable)['GPA'].mean().reset_index()
+            fig = px.bar(avg_gpa_per_category, x=variable, y='GPA', 
+                         title=f"Average GPA by {variable}",
+                         labels={'GPA': 'Average GPA'})
+            st.plotly_chart(fig, use_container_width=True)
+            st.write(f"🔍 **{variable}** influences GPA distribution. Check the bar chart for tendencies towards higher or lower GPA.")
 
     # Define a function to plot the histogram based on the selected variable
     def display_histogram(variable):
-        if variable in ["Age", "StudyTimeWeekly", "Absences", "GPA"]:
+        if variable in ["StudyTimeWeekly", "Absences", "GPA"]:
             # For continuous variables
-            fig = px.histogram(df, x=variable, nbins=10, title=f"{variable} Distribution")
-            st.plotly_chart(fig)
-        elif variable in ["Gender", "Ethnicity", "Parental Education", "Tutoring", 
-                          "Parental Support", "Extracurricular", "Sports", 
+            fig = px.histogram(df, x=variable, nbins=10, title=f"{variable} Distribution",
+                               labels={variable: variable},
+                               hover_data={variable: True})
+            fig.update_layout(bargap=0.1)  # Adjust gap between bars
+            st.plotly_chart(fig, use_container_width=True)
+        elif variable in ["Gender", "Ethnicity", "ParentalEducation", "Tutoring", 
+                          "ParentalSupport", "Extracurricular", "Sports", 
                           "Music", "Volunteering", "GradeClass"]:
             # For categorical variables
-            fig = px.histogram(df, x=variable, title=f"{variable} Distribution", histnorm='percent')
-            st.plotly_chart(fig)
+            fig = px.histogram(df, x=variable, title=f"{variable} Distribution", 
+                               histnorm='percent',
+                               labels={variable: variable},
+                               hover_data={variable: True})
+            fig.update_layout(bargap=0.1)  # Adjust gap between bars
+            st.plotly_chart(fig, use_container_width=True)
+
+        # After displaying histogram, check correlation
+        check_correlation(variable)
 
     # Call the function to plot the histogram for the selected variable
     display_histogram(selected_variable)

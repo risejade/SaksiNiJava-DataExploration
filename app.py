@@ -59,13 +59,10 @@ with st.expander("🖋️ Purpose of Exploration"):
 
     - What is the age distribution of students, and how does it relate to their performance?
     - How do gender and ethnicity distributions appear in the context of academic achievement?
-    - What levels of parental education exist, and how do they affect student outcomes?
     - How many hours do students typically study weekly, and what is the relationship between study time and GPA?
-    - What are the patterns of absenteeism, and how does this correlate with academic performance?
     - How prevalent is tutoring among students, and does it impact their grades?
     - What is the level of parental support, and how does it influence academic success?
-    - How do extracurricular activities (sports, music, volunteering) correlate with academic performance?
-    - What insights can we draw from the relationships between GPA and other variables in the dataset?
+    - How does participation in extracurricular activities affect GPA and performance, considering age?
 
     By addressing these questions, we aim to uncover actionable insights into the determinants of academic performance, guiding strategies for improvement in educational settings.
     """)
@@ -292,7 +289,7 @@ with st.expander("Count Plot - Categorical Variable", expanded=True):
     st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
 
 
-with st.expander("Line Chart - Average GPA by Absences and Age", expanded=True):
+with st.expander("What is the age distribution of students, and how does it relate to their performance?", expanded=True):
     file_id = '1rjhNT-Q9ENl-WAoJFD8vrI0d-bMwCyL7'
     output_file = 'studentsperformance.csv'
 
@@ -347,57 +344,70 @@ with st.expander("Line Chart - Average GPA by Absences and Age", expanded=True):
         )
 
         st.altair_chart(gpa_chart, use_container_width=True)
+        
+with st.expander("How do gender and ethnicity distributions appear in the context of academic achievement?", expanded=True):
+    
+    st.subheader("👨 Gender and Ethnicity Distributions in Context of Academic Achievement")
+    
+    st.markdown("""
+    **Grade Class: Classification of students' grades based on GPA:**
+    - 0: 'A' (GPA >= 3.5)
+    - 1: 'B' (3.0 <= GPA < 3.5)
+    - 2: 'C' (2.5 <= GPA < 3.0)
+    - 3: 'D' (2.0 <= GPA < 2.5)
+    - 4: 'F' (GPA < 2.0)
+    """)
 
-# Box plot - GPA Distribution by Demographics
-with st.expander("Box plot - GPA Distribution by Demographics", expanded=True):
-    st.subheader("📈 GPA Distribution by Demographics")
-    selected_feature = st.selectbox("Select a demographic feature to analyze GPA distribution", ['Age', 'Gender', 'Ethnicity'])
-    
-    # Create a Plotly box plot without points
-    fig = px.box(df, x=selected_feature, y='GPA', 
-                 labels={'GPA': 'Grade Point Average'},
-                 title=f"GPA Distribution by {selected_feature}")
-    
-    # Update layout for better aesthetics
-    fig.update_traces(marker=dict(color='lightblue'))  # Set the box color (optional)
-    
-    # Center the title
-    fig.update_layout(
-        xaxis_title=selected_feature,
-        yaxis_title="GPA",
-        title=dict(
-            text=f"GPA Distribution by {selected_feature}",
-            x=0.5,          # Center the title
-            xanchor='center',  # Anchor the title at the center
-            font=dict(size=20)  # Optional: Set font size for better visibility
+    # Map the numerical values of Gender and Ethnicity for clearer labels
+    df['Gender'] = df['Gender'].map({0: 'Male', 1: 'Female'})
+    df['Ethnicity'] = df['Ethnicity'].map({
+        0: 'Caucasian',
+        1: 'African American',
+        2: 'Asian',
+        3: 'Other'
+    })
+    df['GradeClass'] = df['GradeClass'].map({
+        0: 'A',
+        1: 'B',
+        2: 'C',
+        3: 'D',
+        4: 'F'
+    })
+
+    # Create selectors for gender and ethnicity
+    selected_gender = st.selectbox("Select Gender:", options=df['Gender'].unique())
+    selected_ethnicity = st.selectbox("Select Ethnicity:", options=df['Ethnicity'].unique())
+
+    # Filter the DataFrame based on selected gender and ethnicity
+    filtered_df = df[(df['Gender'] == selected_gender) & (df['Ethnicity'] == selected_ethnicity)]
+
+    # Grouping data by gender and ethnicity and counting grade classes
+    gender_ethnicity_performance = filtered_df.groupby(['Gender', 'Ethnicity', 'GradeClass']).size().reset_index(name='Count')
+
+    # Check if there are any records for the selected filters
+    if not gender_ethnicity_performance.empty:
+        # Plotting the data using Plotly
+        fig = px.bar(
+            gender_ethnicity_performance,
+            x='GradeClass',
+            y='Count',
+            color='GradeClass',
+            title=f'Performance of {selected_gender} Students of {selected_ethnicity} Ethnicity',
+            labels={'GradeClass': 'Grade Class', 'Count': 'Number of Students'},
+            category_orders={'GradeClass': ['A', 'B', 'C', 'D', 'F']}
         )
-    )
-    
-    # Display the Plotly chart
-    st.plotly_chart(fig, use_container_width=True)
 
-    # Conditional markdown based on the selected demographic feature
-    if selected_feature == 'Gender':
-        st.markdown("""The boxplot illustrates the distribution of GPA (Grade Point Average) based on gender, with gender categories represented as 0 and 1. 
-                    The x-axis denotes these gender categories, while the y-axis shows GPA values ranging from 0.0 to 4.0. Each box represents the interquartile 
-                    range (IQR) of GPA for each gender, with the line inside the box indicating the median GPA. The whiskers extend to show variability beyond the 
-                    upper and lower quartiles, capturing the range of GPA values. This boxplot enables a direct comparison of GPA distributions between the two gender groups, 
-                    highlighting any differences in academic performance, which can inform strategies to address educational disparities.""")
+        # Update layout for better readability
+        fig.update_traces(texttemplate='%{y}', textposition='inside')
+        fig.update_layout(xaxis_title='Grade Class', yaxis_title='Number of Students')
 
-    elif selected_feature == 'Age':
-        st.markdown("""The boxplot displays the GPA distribution across different age groups. Each box represents the GPA interquartile range (IQR) for the corresponding age group, 
-                    with the line inside indicating the median GPA. The whiskers extend to show variability beyond the upper and lower quartiles, illustrating how GPA may differ 
-                    among various age demographics. This visualization can help identify trends or disparities in academic performance by age.""")
-
-    elif selected_feature == 'Ethnicity':
-        st.markdown("""The boxplot illustrates the distribution of GPA across different ethnic groups. Each box represents the interquartile range (IQR) of GPA for each ethnic category, 
-                    with the line inside the box indicating the median GPA. The whiskers show variability beyond the upper and lower quartiles, providing insight into how GPA varies among 
-                    different ethnic backgrounds. This analysis can aid in understanding educational outcomes and addressing potential disparities among ethnic groups.""")
+        # Show the plot
+        st.plotly_chart(fig)
 
 
 
 # Study Time vs GPA Scatter Plot Section
-with st.expander("Scatter plot - Study time vs GPA", expanded=True):
+with st.expander("How many hours do students typically study weekly, and what is the relationship between study time and GPA?", expanded=True):
     st.subheader("⏳ Study Time vs GPA")
     
     # Create a Plotly scatter plot
@@ -435,56 +445,146 @@ with st.expander("Scatter plot - Study time vs GPA", expanded=True):
                 achieve better grades, particularly those in higher grade classes. This visualization helps in understanding the potential impact of study habits on academic performance, 
                 indicating that increased study time may be beneficial for improving GPA.""")
 
-# Bar Chart of Grade Class Distribution Section
-with st.expander("Bar Graph - Grade Class Distribution", expanded=True):
-    st.subheader("🥇 Grade Class Distribution")
-    grade_class_group = df.groupby('GradeClass').size().reset_index(name='Counts')
-    grade_class_group['GradeClass'] = grade_class_group['GradeClass'].replace({
-        0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'F'
-    })
-    st.bar_chart(data=grade_class_group.set_index('GradeClass')['Counts'])
-    st.markdown("The bar chart above shows the distribution of students across different grade classes.")
-
-# GPA by Parental Support Section
-with st.expander("Box Plot - GPA by Parental Support", expanded=True):
-    st.subheader("🙌 GPA by Parental Support")
     
-    # Create a Plotly box plot
-    fig = px.box(df, x='ParentalSupport', y='GPA', 
-                 labels={'GPA': 'Grade Point Average'},
-                 title="GPA Distribution by Parental Support")
-
-    # Define a list of unique colors (one for each category)
-    unique_colors = ['lightblue', 'lightgreen', 'salmon', 'gold', 'violet']  # Ensure you have enough colors
-
-    # Assign a unique color to each box
-    for i, box in enumerate(fig.data):
-        box.marker.color = unique_colors[i % len(unique_colors)]  # Cycle through colors
+with st.expander("How prevalent is tutoring among students, and does it impact their grades?", expanded=True):
     
-    # Center the title
-    fig.update_layout(
-        xaxis_title="Parental Support",
-        yaxis_title="GPA",
-        title=dict(
-            text="GPA Distribution by Parental Support",
-            x=0.5,           # Center the title
-            xanchor='center',  # Anchor the title at the center
-            font=dict(size=20)  # Optional: Set font size for better visibility
-        )
+    st.subheader("🥇 Impact on Tutoring of Students")
+    
+    # Map the numerical values for clarity
+    df['Tutoring'] = df['Tutoring'].map({0: 'No', 1: 'Yes'})
+
+    # Create a histogram for GPA based on tutoring status
+    fig = px.histogram(
+        df,
+        x='GPA',
+        color='Tutoring',
+        barmode='overlay',  # Overlay bars to see the distribution
+        title='Distribution of GPA by Tutoring Status',
+        labels={'GPA': 'Grade Point Average', 'Tutoring': 'Tutoring Status'},
+        opacity=0.75,
+         color_discrete_map={'Yes': 'green', 'No': 'orange'},
+        marginal='box'  # Adding box plot on top for summary statistics
     )
-    
-    # Display the Plotly chart
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Markdown explanation
-    st.markdown("This boxplot illustrates how **parental support** levels correlate with GPA.")
 
-# Correlation Heatmap Section
+    # Update layout for better readability
+    fig.update_layout(
+        xaxis_title='Grade Point Average (GPA)',
+        yaxis_title='Number of Students',
+        xaxis=dict(
+            tickmode='linear',  # Linear tick mode for better visibility
+            dtick=0.5  # Set tick intervals for GPA
+        ),
+        title_x=0.2  # Center the title
+    )
+
+    # Show the plot
+    st.plotly_chart(fig)
+    
+with st.expander("What is the level of parental support, and how does it influence academic success?", expanded=True):
+
+    st.subheader("👪 Parental Support vs Academic Success")
+
+    # Mapping ParentalSupport numerical values for clearer labels
+    df['ParentalSupport'] = df['ParentalSupport'].map({
+        0: 'None',
+        1: 'Low',
+        2: 'Moderate',
+        3: 'High',
+        4: 'Very High'
+    })
+
+    # Creating a boxplot using Plotly
+    fig = px.box(
+        df,
+        x='ParentalSupport',
+        y='GPA',
+        color='ParentalSupport',
+        title='Boxplot: Parental Support Levels vs GPA',
+        labels={'ParentalSupport': 'Parental Support Level', 'GPA': 'Grade Point Average (GPA)'},
+        category_orders={"ParentalSupport": ['None', 'Low', 'Moderate', 'High', 'Very High']},
+        color_discrete_map={
+            'None': 'gray',
+            'Low': 'red',
+            'Moderate': 'orange',
+            'High': 'green',
+            'Very High': 'blue'
+        }
+    )
+
+    # Update layout for better readability
+    fig.update_layout(
+        xaxis_title="Parental Support Level",
+        yaxis_title="GPA",
+        boxmode='group'  # Group boxes by Parental Support Level
+    )
+
+    # Display the Plotly chart
+    st.plotly_chart(fig)
+
+    # Explanation markdown
+    st.markdown("""
+        This boxplot visualizes the relationship between **Parental Support** and **GPA**. Each box represents the distribution of GPA values for students with different levels of parental support. The middle line in each box represents the median GPA for that group, while the boxes capture the interquartile range (IQR), and the whiskers show the full range of data.
+        
+        From the plot, you can observe how higher levels of parental support might correlate with higher GPA outcomes, indicating a potential positive influence on academic success.
+    """)
+    
+with st.expander("How does participation in extracurricular activities affect GPA and performance, considering age?", expanded=True):
+
+    st.subheader("🏀 Extracurricular Activities, Age, and Academic Success")
+
+    # Allow user to select one or multiple ages
+    selected_ages = st.multiselect(
+        "Select age(s) to filter:",
+        options=df['Age'].unique(),
+        default=df['Age'].unique()  # Default selects all ages
+    )
+
+    # Filter the dataframe based on the selected ages
+    filtered_df = df[df['Age'].isin(selected_ages)]
+
+    # Map the Extracurricular and GradeClass values for clearer labels
+    filtered_df['Extracurricular'] = filtered_df['Extracurricular'].map({0: 'No', 1: 'Yes'})
+    filtered_df['GradeClass'] = filtered_df['GradeClass'].map({
+        0: 'A',
+        1: 'B',
+        2: 'C',
+        3: 'D',
+        4: 'F'
+    })
+
+    # Creating a histogram for GPA based on extracurricular activities
+    fig = px.histogram(
+        filtered_df,
+        x='GPA',
+        color='Extracurricular',
+        nbins=20,  # Number of bins
+        title='Histogram: GPA Distribution by Extracurricular Participation (Filtered by Age)',
+        labels={'Extracurricular': 'Participation in Extracurricular Activities', 'GPA': 'Grade Point Average (GPA)'},
+        color_discrete_map={'Yes': 'green', 'No': 'orange'},
+        barmode='overlay'  # Overlay bars for better comparison
+    )
+
+    # Update layout for better readability
+    fig.update_layout(
+        xaxis_title="GPA",
+        yaxis_title="Number of Students",
+        bargap=0.1,  # Small gap between bars
+        barmode='overlay'  # Bars for each category will overlap
+    )
+
+    # Display the GPA histogram chart
+    st.plotly_chart(fig)
+
+
 with st.expander("Correlation Matrix Heatmap", expanded=True):
     
     st.subheader("Correlation Matrix Heatmap")
-   
-    corr = df.corr()
+
+    # Select only numeric columns for correlation
+    numeric_df = df.select_dtypes(include=[np.number])
+
+    # Compute the correlation matrix
+    corr = numeric_df.corr()
 
     # Create a Plotly heatmap with a valid colorscale
     fig = px.imshow(
@@ -503,12 +603,12 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
     
     # Display the Plotly chart
     st.plotly_chart(fig, use_container_width=True)
-    
+
     # Markdown explanation
     st.markdown("""The matrix heatmap provided represents the correlation coefficients between various variables related to student performance and behavior. 
                 The color gradient from dark purple (negative correlations) to bright yellow (positive correlations) indicates the strength and direction of the relationships 
                 between the variables. Diagonal values are all 1.00 because they represent each variable's perfect correlation with itself.""")
-
+    
     # Adding a bullet list of key findings
     st.write("Key Findings from the Correlation Matrix:")
     findings = [
@@ -518,8 +618,7 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
         "📌 Most other variables, such as Parental Education, Sports, and Extracurricular activities, show weaker or negligible correlations with GPA or other variables."
     ]
     st.write("- " + "\n- ".join(findings))
-
-
+    
 variable_options = [
     "Age",
     "Gender",
@@ -557,68 +656,6 @@ with st.expander("Histogram", expanded=True):
     # Call the function to plot the histogram for the selected variable
     display_histogram(selected_variable)
 
-    st.markdown("---")
-
-# Boxplots 
-def create_boxplots(data):
-    variables = [
-        'Age', 
-        'Gender', 
-        'Ethnicity', 
-        'Parental Education', 
-        'StudyTimeWeekly', 
-        'Absences', 
-        'Tutoring', 
-        'Parental Support', 
-        'Extracurricular', 
-        'Sports', 
-        'Music', 
-        'Volunteering', 
-        'GPA', 
-        'GradeClass'
-    ]
-    
-with st.expander("Box Plot", expanded=True):
-    # Add a selectbox for choosing the variable to visualize
-    st.subheader("Boxplots of Student Variables")
-    selected_variable = st.selectbox("Choose a variable to display its boxplot:", 
-                                    options=[
-                                        'Age', 
-                                        'Gender', 
-                                        'Ethnicity', 
-                                        'Parental Education', 
-                                        'StudyTimeWeekly', 
-                                        'Absences', 
-                                        'Tutoring', 
-                                        'Parental Support', 
-                                        'Extracurricular', 
-                                        'Sports', 
-                                        'Music', 
-                                        'Volunteering', 
-                                        'GPA', 
-                                        'GradeClass'
-                                    ])
-
-    # Function to create boxplot
-    def create_boxplot(data, variable):
-        plt.figure(figsize=(10, 6))
-        if variable in ['Gender', 'Ethnicity', 'Tutoring', 'Extracurricular', 'Sports', 'Music', 'Volunteering', 'GradeClass']:
-            sns.boxplot(x=variable, y='GPA', data=data)
-            plt.title(f'Boxplot of GPA by {variable}')
-            plt.xlabel(variable)
-            plt.ylabel('GPA')
-        else:
-            sns.boxplot(y=variable, data=data)
-            plt.title(f'Boxplot of {variable}')
-            plt.ylabel(variable)
-        
-        plt.grid(True)
-        st.pyplot(plt)
-
-    # Create and display the boxplot for the selected variable
-    create_boxplot(df, selected_variable)
-
-
 st.subheader("Conclusion")
 st.image("conclu.jpg", use_column_width=True)
 
@@ -649,3 +686,4 @@ conclusion_text = """
 
 
 st.markdown(conclusion_text)
+

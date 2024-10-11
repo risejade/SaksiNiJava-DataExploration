@@ -253,40 +253,40 @@ with st.expander("Pie Chart - Age and Gender", expanded=True):
 
     st.markdown("---")
 
-with st.expander("Count Plot - Categorical Variable", expanded=True):
-    df.drop(['GPA'], axis=1, inplace=True)
+# with st.expander("Count Plot - Categorical Variable", expanded=True):
+#     df.drop(['GPA'], axis=1, inplace=True)
 
-    numerical_columns = [col for col in df.columns if df[col].nunique() > 5]
+#     numerical_columns = [col for col in df.columns if df[col].nunique() > 5]
 
-    categorical_columns = df.columns.difference(numerical_columns).difference(['GradeClass']).to_list()
+#     categorical_columns = df.columns.difference(numerical_columns).difference(['GradeClass']).to_list()
 
-    custom_labels = {
-        'Ethnicity': ['Caucasian', 'African American', 'Asian', 'Other'],
-        'Age': [15, 16, 17, 18],
-        'ParentalEducation': ['None', 'High School', 'Some College', 'Bachelor\'s', 'Higher'],
-        'Tutoring': ['No', 'Yes'],
-        'ParentalSupport': ['No', 'Low', 'Moderate', 'High', 'Very High'],
-        'Extracurricular': ['No', 'Yes'],
-        'Sports': ['No', 'Yes'],
-        'Music': ['No', 'Yes'],
-        'Volunteering': ['No', 'Yes'],
-        'Gender': ['Male', 'Female']
-    }
+#     custom_labels = {
+#         'Ethnicity': ['Caucasian', 'African American', 'Asian', 'Other'],
+#         'Age': [15, 16, 17, 18],
+#         'ParentalEducation': ['None', 'High School', 'Some College', 'Bachelor\'s', 'Higher'],
+#         'Tutoring': ['No', 'Yes'],
+#         'ParentalSupport': ['No', 'Low', 'Moderate', 'High', 'Very High'],
+#         'Extracurricular': ['No', 'Yes'],
+#         'Sports': ['No', 'Yes'],
+#         'Music': ['No', 'Yes'],
+#         'Volunteering': ['No', 'Yes'],
+#         'Gender': ['Male', 'Female']
+#     }
 
-    selected_variable = st.selectbox('Select a categorical variable to display a countplot', categorical_columns)
+#     selected_variable = st.selectbox('Select a categorical variable to display a countplot', categorical_columns)
 
-    st.subheader(f'Countplot of {selected_variable}')
+#     st.subheader(f'Countplot of {selected_variable}')
 
-    counts = df[selected_variable].value_counts().sort_index()
+#     counts = df[selected_variable].value_counts().sort_index()
 
-    counts_df = pd.DataFrame(counts).reset_index()
-    counts_df.columns = [selected_variable, 'Count']
+#     counts_df = pd.DataFrame(counts).reset_index()
+#     counts_df.columns = [selected_variable, 'Count']
 
-    counts_df[selected_variable] = counts_df[selected_variable].replace(dict(enumerate(custom_labels[selected_variable])))
+#     counts_df[selected_variable] = counts_df[selected_variable].replace(dict(enumerate(custom_labels[selected_variable])))
 
-    colors = sns.color_palette("Set2", n_colors=len(counts_df))
+#     colors = sns.color_palette("Set2", n_colors=len(counts_df))
 
-    st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
+#     st.bar_chart(data=counts_df.set_index(selected_variable)['Count'], use_container_width=True)
 
 
 with st.expander("What is the age distribution of students, and how does it relate to their performance?", expanded=True):
@@ -632,8 +632,6 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
 # Other code continues here...
 
 variable_options = [
-    "Age",
-    "Gender",
     "Ethnicity",
     "Parental Education",
     "StudyTimeWeekly",

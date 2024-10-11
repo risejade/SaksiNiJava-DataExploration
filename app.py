@@ -676,10 +676,7 @@ with st.expander("Correlation Matrix Heatmap", expanded=True):
     st.plotly_chart(fig, use_container_width=True)
 
     # Markdown explanation
-    st.markdown("""The heatmap you provided is a correlation matrix, 
-                which visually represents the relationships between 
-                different variables in a dataset related to predicting 
-                student grades (GPA). Each cell in the matrix contains 
+    st.markdown("""Each cell in the matrix contains 
                 a correlation coefficient, ranging from -1 to 1, which 
                 indicates the strength and direction of the relationship 
                 between two variables. A correlation of 1 (shown in yellow) 
